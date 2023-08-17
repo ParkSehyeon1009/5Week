@@ -221,7 +221,7 @@ class Dog : public Animal
 public:
     virtual void eat() const override
     {
-        cout << "냥" << endl;
+        cout << "멍" << endl;
     }
 };
 
@@ -263,7 +263,7 @@ class Dog : public Animal
 public:
     virtual void eat() const override
     {
-        cout << "냥" << endl;
+        cout << "멍" << endl;
     }
 };
 
