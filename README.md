@@ -444,12 +444,12 @@ private:
 
 };
 
-class DerivedClass : public BaseClass
+class SampleClass : public BaseClass
 {
 public:
 ‌...
 
-‌friend ostream& operator<<(ostream& os, const DerivedClass& rh);
+‌friend ostream& operator<<(ostream& os, const SampleClass& rh);
 
 private:
 ‌char* style;
@@ -464,7 +464,7 @@ ostream& operator<<(ostream& os, const BaseClass& rs)
 ‌return os;
 }
 
-ostream& operator<<(ostream& os, const DerivedClass& rh)
+ostream& operator<<(ostream& os, const SampleClass& rh)
 {
 ‌os << (const BaseClass&)rh; //강제 데이터형 변환
 ‌os << "스타일 : " << rh.color << endl;
@@ -472,3 +472,5 @@ ostream& operator<<(ostream& os, const DerivedClass& rh)
 ‌return os;
 }
 ```
+파생클래스가 SampleClass의 friend이기 때문에 sstyle멤버에 접근이 가능하지만 기초 클래스의<br>
+friend가 아님으로 label과 rating멤버에 접근 불가하다. 이를 해결하기 위해 기초 클래스에도 friend를 사용한다.
