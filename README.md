@@ -367,3 +367,15 @@ int main() {
 }
 ```
 **상속과 동적 메모리 대입**<br>
+파생 클래스의 성질마다 상속은 동적 메모리 대입과 관계가 다르다.<br>
+아래와 같은 기본 클래스가 있다고 가정해보자.
+```cpp
+class BaseClass
+{
+  public:
+    BaseClass(const char* str = "null", int r = 0); //생성자
+    BaseClass(const BassClass& rs); //복사 생성자
+    virtual ~BaseClass(); //소멸자
+    BaseClass& operator=(const BaseClass& rs); //대입 연산자
+}
+```
