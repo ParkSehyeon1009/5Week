@@ -379,3 +379,96 @@ class BaseClass
     BaseClass& operator=(const BaseClass& rs); //대입 연산자
 }
 ```
+만약 BaseClass 에서 파생하는 클래스가 new를 사용하지 않고 다른 특별한 처리도 요구하지 않는다고 가정해보자<br>
+파생 클래스를 위해 명시적으로 소멸자,복사 생성자, 대입연산자를 정의를 하지 않아도 된다.<br>
+소멸자의 경우 명시적으로 소멸자를 정의하지 않으면 컴파일러가 기본 소멸자를 정의해주며<br> 
+파생 클래스의 소멸자는 기초 클래스의 소멸자를 항상 호출한다.<br>
+<br>
+복사 생성자의 경우, 기본 복사 생성자는 멤버별 복사를 한다. 멤버별 복사는 동적 메모리 대입에는 사용할 수 없고,<br>
+새로운 파생 클래스의 멤버에 대해서는 멤버별 복사를 사용할 수 있다.<br> 
+클래스 멤버 또는 기초 클래스의 클래스 성분을 복사하는 것은 해당 클래스의 복사 생성자를 통하여 이루어진다.<br>
+파생 클래스의 기본 복사 생성자는 기초 클래스 성분을 복사하기 위해 명시적인 기초 클래스의 복사 생성자를 이용하므로,<br> 
+파생 클래스의 기본 복사 생성자는 새로운 파생 클래스 멤버에 대해 사용할 수 있고<br>
+상속받은 기초 클래스 객체에 대해서도 사용할 수 있다.<br>
+대입 연산자 또한 복사 생성자와 같은 논리가 적용된다.<br>
+<br>
+파생 클래스가 new를 사용한다고 가정해보자<br>
+이 경우에는 파생클래스를 위해 명시적으로 정의를 해주어야 한다.
+```cpp
+class SampleClass : public BaseClass
+{
+  public:
+  ~SampleClass(); //소멸자
+  SampleClass(const SampleClass& rh); //복사 생성자
+  SampleClass& operator=(const SampleClass rh); //대입 연산자
+
+  private:
+    char* style;
+};
+SampleClass::~SampleClass()//소멸자
+{
+  delete[] style;
+}
+SampleClass::SampleClass(const SampleClass & rh) //복사 생성자
+‌: BaseClass(rh)
+{
+‌style = new char[strlen(rh.style) + 1];
+‌strcpy(style, rh.style);
+}
+
+SampleClass& SampleClass::operator=(const SampleClass & rh) //대입 연산자
+{
+‌if (this == &rh)
+‌‌return *this;
+
+‌BaseClass::operator=(rh); //rh의 기초 클래스 복사
+‌delete[] style;
+‌style = new char[strlen(rh.style) + 1];
+‌strcpy(style, rh.style);
+
+‌return *this;
+}
+```
+아래 예제는 동적 메모리 대입과 프렌드를 이용하는 상속이다.
+```cpp
+class BaseClass
+{
+public:
+‌...
+
+‌friend ostream& operator<<(ostream& os, const BaseClass& rs);
+
+private:
+‌char* label;
+‌int rating;
+
+};
+
+class DerivedClass : public BaseClass
+{
+public:
+‌...
+
+‌friend ostream& operator<<(ostream& os, const DerivedClass& rh);
+
+private:
+‌char* style;
+
+};
+
+ostream& operator<<(ostream& os, const BaseClass& rs)
+{
+‌os << "상표 : " << rs.label << endl;
+‌os << "등급 : " << rs.rating << endl;
+
+‌return os;
+}
+
+ostream& operator<<(ostream& os, const DerivedClass& rh)
+{
+‌os << (const BaseClass&)rh; //강제 데이터형 변환
+‌os << "스타일 : " << rh.color << endl;
+
+‌return os;
+}
+```
