@@ -114,10 +114,256 @@ void main()
 **정적 결합과 동적 결합**<br>
 정적 결합 : 가르키고 있는 타입이 아니라 스스로, 변수의 타입만 보고 어떤 함수로 갈지를 결정 한 것<br>
 예) 함수 오버로딩<br>
+```cpp
+class A
+{
+  public:
+    int num;
+};
+class B : public A
+{
+};
+A operator+(const A& x, const A& y)
+{
+  A a;
+  a.num = x.num + y.num;
+  return a;
+}
+B operator+(const B& x, consst B& y) // 곱셈 연산이 덧셈 연산보다 복잡하기 때문에 구체적인 구현을 제공함
+{
+  B b;
+  b.num = x.num * y.num;
+  return b;
+}
+void main()
+{
+  B a0, a1;
+  a0.num = 10;
+  a1.num = 20;
+  A a2 = a0 + a1;
+  cout << a2.num;
+}
+```
+결과는 아래와 같다
+```
+200
+```
+위와 같이 더 구체적인 구현을 하는 함수를 사용한다.<br>
+아래 또한 비슷한 예제이다
+```cpp
+class A
+{
+public:
+    int num;
+};
+class B : public A
+{
+
+};
+
+A operator+(const A& x, const A& y)
+{
+    A a;
+    a.num = x.num + y.num;
+    return a;
+}
+
+B operator+(const B& x, const B& y)
+{
+    B b;
+    b.num = x.num * y.num;
+    return b;
+}
+
+
+int main()
+{
+    B b0, b1;
+    b0.num = 10;
+    b1.num = 20;
+
+    A& a0 = b0;
+    A& a1 = b1;
+
+    A a2 = a0 + a1;
+    cout << a2.num << endl;
+}
+```
+실행 결과는 아래와 같다.
+```
+30
+```
+결과값이 다르게 나오는 이유는 변수의 타입만 보고 어떤 함수로 갈지 결정한 정적결합 특징이다.<br>
+<br>
 동적 결합 : 런타입 바인딩, 런타임 도중에 타입이 결정되는 것을 동적 결합 이라고 한다.<br>
 예) 함수 오버라이딩<br>
+```cpp
+class Animal
+{
+public:
+    virtual void eat() const
+    {
+        cout << "냠" << endl;
+    }
+};
 
+class Cat : public Animal
+{
+public:
+    virtual void eat() const override
+    {
+        cout << "냥" << endl;
+    }
+};
+
+class Dog : public Animal
+{
+public:
+    virtual void eat() const override
+    {
+        cout << "냥" << endl;
+    }
+};
+
+
+int main()
+{
+    Animal* a = new Dog();
+    a->eat(); // 가리키고 있는 객체의 함수를 호출함
+    // 런타임 도중에 매번 가리키고 있는 함수를 찾음 (런타임 바인딩임.)
+}
+```
+아래는 동적결합의 예제이다
+```cpp
+class Animal
+{
+public:
+    int* p;
+    virtual void eat() const
+    {
+        cout << "냠" << endl;
+    }
+    virtual void foo()
+    {
+        cout << "foo " << endl;
+    }
+};
+
+class Cat : public Animal
+{
+public:
+    virtual void eat() const override
+    {
+        cout << "냥" << endl;
+    }
+};
+
+class Dog : public Animal
+{
+public:
+    virtual void eat() const override
+    {
+        cout << "냥" << endl;
+    }
+};
+
+
+int main()
+{
+    Dog d;
+    Animal* animal = new Cat; // 부모가 자식을 가르킬때는 가상함수 메카니즘에 의해 가상함수 테이블을 통해 런타임 도중에 함수를 찾는다
+    animal->eat(); // 런타임 도중에 최적의 함수인 오버라이딩에 의해 "냥"을 출력한다.
+```
 **접근 제어 : protected**<br>
+pritacted는 간단하게 자식클래스의 멤버함수에서만 접근가능하게 해준다.
+```cpp
+class A {
+public:
+    int num1;
+
+    A() : num1(5), num2(6), num3(7) {}
+    void pri() { cout << "hi" << endl; };
+
+protected:
+    int num2;
+private:
+    int num3;
+
+};
+
+class B : protected A {
+public:
+     
+    void setNum() {
+        num1 = 10;   //컴파일 가능!!
+        num2 = 100;  //컴파일 가능!!
+        num3 = 1000; //컴파일 불가!!
+    }
+};
+
+
+int main(void) {
+
+    B b;
+    b.pri();                //컴파일 불가!
+    cout << b.num1 << endl; //컴파일 불가!!
+    cout << b.num2 << endl; //컴파일 불가!!
+    cout << b.num3 << endl; //컴파일 불가!!
+
+}​
+```
 **추상화 기초 클래스**<br>
+추상화 기초 클래스 : 공통된 부분이 많지만, 한 객체가 어느 한 쪽에 속하지는 않는 관계일 때,<br>
+공통된 멤버들만으로 정의한 클래스를 뜻한다. <br>
+예를 들어 A를 구현하고 나머지 부분은 각 클래스마다 다르게 구현한후 A를 상속받는 방법으로 정의하는 방식<br>
+아래는 예제이다.
+```cpp
+class Fruit {
+public:
+    Fruit(const string& n) : name(n) {}
+
+    virtual string getName() const {
+        return name;
+    }
+
+    virtual void eat() const = 0; // 순수 가상 함수
+
+private:
+    string name;
+};
+
+// 사과 클래스
+class Apple : public Fruit {
+public:
+    Apple() : Fruit("Apple") {}
+
+    void eat() const override {
+        cout << "Eating an apple." << endl;
+    }
+};
+
+// 바나나 클래스
+class Banana : public Fruit {
+public:
+    Banana() : Fruit("Banana") {}
+
+    void eat() const override {
+        cout << "Peeling and eating a banana." << endl;
+    }
+};
+
+int main() {
+    Apple apple;
+    Banana banana;
+
+    Fruit* fruits[] = { &apple, &banana };
+
+    for (const Fruit* fruit : fruits) {
+        cout << "Fruit: " << fruit->getName() << endl;
+        fruit->eat();
+    }
+
+    return 0;
+}
+```
 **상속과 동적 메모리 대입**<br>
-**클래스 설계 복습**<br>
